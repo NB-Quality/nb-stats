@@ -41,8 +41,8 @@ config.pagefliptimer
 
 
 ## Stats settings 
-In folder data/gamebase.csv we can add more gamebase stats 
-In folder data/stats.csv we can add custom stats 
+In folder data/gamebase.csv we can add more gamebase stats  
+In folder data/stats.csv we can add custom stats  
 with example:
 ```
 stat,type,min,max
@@ -58,3 +58,5 @@ luck9,int,0,100
 luck10,int,0,100
 luck11,int,0,100
 ```
+
+the UI only show when you toggled the weapon wheels
