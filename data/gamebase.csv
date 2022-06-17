@@ -1,0 +1,9 @@
+stat,type,min,max
+stamina,int,0,100
+shooting_ability,int,0,100
+strength,int,0,100
+stealth_ability,int,0,100
+flying_ability,int,0,100
+wheelie_ability,int,0,100
+lung_capacity,int,0,100
+player_mental_state,float,0.0,100.0

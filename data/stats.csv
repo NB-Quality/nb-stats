@@ -1,0 +1,12 @@
+stat,type,min,max
+luck1,int,0,100
+luck2,int,0,100
+luck3,int,0,1000
+luck4,int,0,100
+luck5,int,0,100
+luck6,int,0,100
+luck7,int,0,100
+luck8,int,0,100
+luck9,int,0,100
+luck10,int,0,100
+luck11,int,0,100
