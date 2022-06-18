@@ -44,7 +44,7 @@ CreateThread(function()
             table.insert(acceptedcolumn,stats.stat)
             local result = exports.oxmysql:query_async([[SHOW COLUMNS FROM `stats` LIKE ?]],{stats.stat})
             if #result == 0 then 
-                exports.oxmysql:query_async([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NULL DEFAULT ?]], {tempDefault})
+                exports.oxmysql:query_async([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NOT NULL DEFAULT ?]], {tempDefault})
             end 
         end 
     end 
@@ -65,7 +65,7 @@ CreateThread(function()
         table.insert(acceptedcolumn,stats.stat)
         local result = exports.oxmysql:query_async([[SHOW COLUMNS FROM `stats` LIKE ?]],{stats.stat})
         if #result == 0 then 
-            exports.oxmysql:query_async([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NULL DEFAULT ?]], {tempDefault})
+            exports.oxmysql:query_async([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NOT NULL DEFAULT ?]], {tempDefault})
         end 
     end 
 end)
