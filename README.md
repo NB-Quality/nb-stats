@@ -41,8 +41,8 @@ config.pagefliptimer
 
 
 ## Stats settings 
-In folder data/gamebase.csv we can add more gamebase stats  
-In folder data/stats.csv we can add custom stats  
+In folder data/gamebase.csv we can add more gamebase stats 
+In folder data/stats.csv we can add custom stats 
 with example:
 ```
 stat,type,min,max

@@ -30,7 +30,8 @@ ReadCSV = function(path,translationkeys)
     local k = 1 
     local data = {}
     local rawdata = LoadResourceFile(GetCurrentResourceName(),path)
-    local delimiter = "\r\n"
+    local rawdata = rawdata:gsub("\r","")
+    local delimiter = "\n"
     for line in (rawdata..delimiter):gmatch('(.-)'..delimiter) do
         local s = line 
         local delimiter = ","
