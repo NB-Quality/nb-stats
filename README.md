@@ -19,7 +19,7 @@ AddPlayerStat(player,type,amount,cb,reason)
 SetPlayerStat(player,type,amount,cb,reason)
 GetStatsLog(player,cb)
 GetPlayerStats(player,cb)
-
+LoadStats(path) --will try to load your script:/path first,then nb-stats:/path
 ```
 
 ## client functions
