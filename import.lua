@@ -17,8 +17,8 @@ else
         GetPlayerStats = function(...)
             return exports["nb-stats"]:GetPlayerStats(...)
         end 
-        LoadStats = function(...)
-            return exports["nb-stats"]:LoadStats(...)
+        LoadStatsDataFile = function(...)
+            return exports["nb-stats"]:LoadStatsDataFile(...)
         end 
         
     else 
@@ -32,6 +32,8 @@ else
         SetPlayerStat = function(...)
             return exports["nb-stats"]:SetPlayerStat(...)
         end 
-        
+        LoadClientTempStatsDataFile = function(...)
+            return exports["nb-stats"]:LoadClientTempStatsDataFile(...)
+        end 
     end 
 end 

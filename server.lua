@@ -27,7 +27,7 @@ local AddColumnsAuto = function(csv_data)
     
 end 
 
-local LoadStats = function(path)
+local LoadStatsDataFile = function(path)
     local raw =  LoadResourceFile(GetCurrentResourceName(),path) 
     if not raw then 
         local invoking = GetInvokingResource()
@@ -46,9 +46,9 @@ end
 
 CreateThread(function() 
     if LoadGamebaseStats then 
-        LoadStats("data/gamebase.csv")
+        LoadStatsDataFile("data/gamebase.csv")
     end
-    LoadStats("data/stats.csv")
+    LoadStatsDataFile("data/stats.csv")
 end)
 
 local GetMinMax = function(stat)
@@ -276,7 +276,7 @@ end
 RegisterServerCallback("GetPlayerStats", GetPlayerStats )
 
 
-exports("LoadStats",LoadStats)
+exports("LoadStatsDataFile",LoadStatsDataFile)
 exports("RemovePlayerStat",RemovePlayerStat)
 exports("AddPlayerStat",AddPlayerStat)
 exports("SetPlayerStat",SetPlayerStat)

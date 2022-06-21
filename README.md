@@ -25,8 +25,9 @@ LoadStats(path) --will try to load your script:/path first,then nb-stats:/path
 ## client functions
 ```
 UpdatePlayerStats()
-GetPlayerStat(stat, type)
-SetPlayerStat(stat, amount)
+GetPlayerStat(stat, type, isCustomStatHash)
+SetPlayerStat(stat, amount, isCustomStatHash)
+LoadClientTempStats(path) --will try to load your script:/path first,then nb-stats:/path
 ```
 
 ## configs 

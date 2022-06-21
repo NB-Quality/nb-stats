@@ -3,7 +3,7 @@ local LoadGamebaseStats = config.LoadGamebaseStats
 local GlobalStats = {}
 local GlobalStored = {}
 
-local LoadStats = function(path)
+local LoadClientTempStats = function(path)
     local raw =  LoadResourceFile(GetCurrentResourceName(),path) 
     if not raw then 
         local invoking = GetInvokingResource()
@@ -21,11 +21,11 @@ local LoadStats = function(path)
 end 
 
 if LoadGamebaseStats then 
-    LoadStats("data/gamebase.csv")
+    LoadClientTempStats("data/gamebase.csv")
 end
-LoadStats("data/stats.csv")
+LoadClientTempStats("data/stats.csv")
 
-local GetMinMax = function(stat)
+local GetClientTempMinMax = function(stat)
     local stat = stat:lower()
     local d = GlobalStats[stat] or error(stat,2)
     return d.min,d.max
@@ -75,10 +75,10 @@ local GetStoreCustom = function(stat)
     return GlobalStored[stat] 
 end 
 
-SetPlayerStat = function (stat,amount)
+SetPlayerStat = function (stat,amount,isCustomStatHash)
    local stat = stat:lower()
    local GetStatGamebase = function(stat)
-       local stat = GetHashKey("mp0_"..stat)
+       local stat = isCustomStatHash and GetHashKey(stat) or GetHashKey("mp0_"..stat)
        return stat 
    end 
    if type(amount) == "string" then 
@@ -105,11 +105,11 @@ SetPlayerStat = function (stat,amount)
    end 
 end
 
-GetPlayerStat = function (stat, type)
+GetPlayerStat = function (stat, type, isCustomStatHash)
    local stat = stat:lower()
    local type = type:lower()
    local GetStatGamebase = function(stat)
-       local stat = GetHashKey("mp0_"..stat)
+       local stat = isCustomStatHash and GetHashKey(stat) or GetHashKey("mp0_"..stat)
        return stat 
    end 
    if type then 
@@ -143,13 +143,13 @@ UpdatePlayerStats = function()
                 
                 local GetStatIntLocalPercent = function(stat)
                     local r = GetPlayerStat(stat,'int')
-                    local min,max =  GetMinMax(stat)
+                    local min,max =  GetClientTempMinMax(stat)
                     r = math.floor((r - min) / (max - min) * 100)
                     return r
                 end 
                 local GetStatFloatLocalPercent = function(stat,prefix)
                     local r = GetPlayerStat(stat,'float')
-                    local min,max =  GetMinMax(stat)
+                    local min,max =  GetClientTempMinMax(stat)
                     r = (r - min) / (max - min) * 100
                     return r
                 end 
@@ -168,7 +168,7 @@ UpdatePlayerStats = function()
                             if  key == k then -- custom ui slots
                                 
                                 if currentSlots < 9 then 
-                                    local min,max =  GetMinMax(k)
+                                    local min,max =  GetClientTempMinMax(k)
                                     v = math.floor((v - min) / (max - min) * 100)
                                     table.insert(temp,v)
                                     table.insert(temp,k)
@@ -235,3 +235,4 @@ end)
 exports("UpdatePlayerStats",UpdatePlayerStats)
 exports("GetPlayerStat",GetPlayerStat)
 exports("SetPlayerStat",SetPlayerStat)
+exports("LoadClientTempStats",LoadClientTempStats)
