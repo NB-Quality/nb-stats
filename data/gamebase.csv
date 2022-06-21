@@ -1,4 +1,4 @@
-stat,type,min,max
+#stat,type,min,max
 stamina,int,0,100
 shooting_ability,int,0,100
 strength,int,0,100
