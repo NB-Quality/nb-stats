@@ -18,19 +18,26 @@ local AddColumnsAuto = function(tbl)
             tempType = "VARCHAR(200)"
             tempDefault = ""
         end 
-        
-        table.insert(acceptedcolumn,stats.stat)
-        local result = exports.oxmysql:query_async([[SHOW COLUMNS FROM `stats` LIKE ?]],{stats.stat})
-        if #result == 0 then 
-            exports.oxmysql:query_async([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NULL DEFAULT ?]], {tempDefault})
+        local found = false 
+        for i=1,#acceptedcolumn do 
+            if acceptedcolumn[i] == stats.stat then 
+                found = true 
+                break 
+            end 
         end 
+        if not found then table.insert(acceptedcolumn,stats.stat) end
+        exports.oxmysql:query([[SHOW COLUMNS FROM `stats` LIKE ?]],{stats.stat},function(result)
+            
+            if #result == 0 then 
+                exports.oxmysql:query([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NULL DEFAULT ?]], {tempDefault})
+            end 
+        end) 
+        
     end 
     
 end 
 
-CreateThread(function() 
-    AddColumnsAuto()
-end)
+
 
 local LoadStatsDataFile = function(path)
     local raw =  LoadResourceFile(GetCurrentResourceName(),path) 
@@ -45,7 +52,7 @@ local LoadStatsDataFile = function(path)
         local stats = datas[i]
         table.insert(GlobalStats,stats)
     end 
-    
+    AddColumnsAuto(datas)
     return datas 
 end 
 
@@ -247,56 +254,51 @@ end
 local GetPlayerStats = function(player,cb)
     local player = tonumber(player)
     local license = GetPlayerLicense("license", player)
-    local result = exports.oxmysql:query_async("SELECT "..table.concat(acceptedcolumn,",").." FROM stats WHERE license = ? LIMIT 1", {license})
-    local Stat_account = result and result[1]
-    local Stat_account_numbered
-    local minmaxs = {}
-    if Stat_account then 
-        for i,v in pairs(Stat_account) do 
-            if tonumber(tostring(tonumber(v))) == tonumber(v) then 
-                result[1][i] = tonumber(v)
-                minmaxs[i] = {GetMinMax(i)}
-            end 
-        end 
-        Stat_account_numbered = result[1]
-        cb(Stat_account_numbered,minmaxs)
-    else 
-        local datas = {
-            license = license
-        }
-        RegisterDatabaseTable("stats",datas,function()
-            local result2 = exports.oxmysql:query_async("SELECT "..table.concat(acceptedcolumn,",").." FROM stats WHERE license = ? LIMIT 1", {license})
-            local Stat_account = assert(result2 and result2[1], "Error getting Stat datas")
-            local Stat_account_numbered
-            if Stat_account then 
-                for i,v in pairs(Stat_account) do 
-                    if tonumber(tostring(tonumber(v))) == tonumber(v) then 
-                        result2[1][i] = tonumber(v)
-                        minmaxs[i] = {GetMinMax(i)}
-                    end 
+    exports.oxmysql:query("SELECT "..table.concat(acceptedcolumn,",").." FROM stats WHERE license = ? LIMIT 1", {license},function(result)
+        local Stat_account = result and result[1]
+        local Stat_account_numbered
+        local minmaxs = {}
+        if Stat_account then 
+            for i,v in pairs(Stat_account) do 
+                if tonumber(tostring(tonumber(v))) == tonumber(v) then 
+                    result[1][i] = tonumber(v)
+                    minmaxs[i] = {GetMinMax(i)}
                 end 
-                Stat_account_numbered = result2[1]
-                cb(Stat_account_numbered,minmaxs)
-            else 
-                cb({}) -- error
-                error("",2)
-            end
-            
-        end)
-    end 
+            end 
+            Stat_account_numbered = result[1]
+            cb(Stat_account_numbered,minmaxs)
+        else 
+            local datas = {
+                license = license
+            }
+            RegisterDatabaseTable("stats",datas,function()
+                exports.oxmysql:query("SELECT "..table.concat(acceptedcolumn,",").." FROM stats WHERE license = ? LIMIT 1", {license},function(result2)
+                    local Stat_account = assert(result2 and result2[1], "Error getting Stat datas")
+                    local Stat_account_numbered
+                    if Stat_account then 
+                        for i,v in pairs(Stat_account) do 
+                            if tonumber(tostring(tonumber(v))) == tonumber(v) then 
+                                result2[1][i] = tonumber(v)
+                                minmaxs[i] = {GetMinMax(i)}
+                            end 
+                        end 
+                        Stat_account_numbered = result2[1]
+                        cb(Stat_account_numbered,minmaxs)
+                    else 
+                        cb({}) -- error
+                        error("",2)
+                    end
+                end) 
+                
+            end)
+        end 
+    end) 
     
 end
 RegisterServerCallback("GetPlayerStats", GetPlayerStats )
 
 
-exports("LoadStatsDataFile",function(...)
-    local r = LoadStatsDataFile(...)
-    CreateThread(function() 
-        AddColumnsAuto(r)
-        print(json.encode(r))
-    end)
-    return r 
-end)
+exports("LoadStatsDataFile",LoadStatsDataFile)
 exports("RemovePlayerStat",RemovePlayerStat)
 exports("AddPlayerStat",AddPlayerStat)
 exports("SetPlayerStat",SetPlayerStat)
