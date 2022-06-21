@@ -1,27 +1,5 @@
 local LoadGamebaseStats = config.LoadGamebaseStats
-local stats_csv,stats_csv_gamebase; 
 local GlobalStats = {}
-
-local LoadStats = function(path)
-    local raw =  LoadResourceFile(GetCurrentResourceName(),path) 
-    if not raw then 
-        local invoking = GetInvokingResource()
-        if invoking then 
-            raw = LoadResourceFile(invoking,path)
-        end 
-    end 
-    local datas = ReadCSVRaw(raw)
-    for i=1,#datas do 
-        local stats = datas[i]
-        GlobalStats[stats.stat] = stats
-    end 
-    return datas 
-end 
-
-if LoadGamebaseStats then 
-    stats_csv_gamebase = LoadStats("data/gamebase.csv") 
-end
-stats_csv = LoadStats("data/stats.csv")
 
 local acceptedcolumn = {}
 local AddColumnsAuto = function(csv_data)
@@ -46,14 +24,31 @@ local AddColumnsAuto = function(csv_data)
             exports.oxmysql:query_async([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NULL DEFAULT ?]], {tempDefault})
         end 
     end 
+    
+end 
 
+local LoadStats = function(path)
+    local raw =  LoadResourceFile(GetCurrentResourceName(),path) 
+    if not raw then 
+        local invoking = GetInvokingResource()
+        if invoking then 
+            raw = LoadResourceFile(invoking,path)
+        end 
+    end 
+    local datas = ReadCSVRaw(raw)
+    for i=1,#datas do 
+        local stats = datas[i]
+        GlobalStats[stats.stat] = stats
+    end 
+    AddColumnsAuto(datas)
+    return datas 
 end 
 
 CreateThread(function() 
     if LoadGamebaseStats then 
-        AddColumnsAuto(stats_csv_gamebase)
-    end 
-    AddColumnsAuto(stats_csv)
+        LoadStats("data/gamebase.csv")
+    end
+    LoadStats("data/stats.csv")
 end)
 
 local GetMinMax = function(stat)
