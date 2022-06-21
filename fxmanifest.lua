@@ -24,3 +24,7 @@ shared_scripts {
 files {
     'data/*.csv',
 }
+
+dependencies {
+	'oxmysql',
+}

@@ -2,9 +2,10 @@ local LoadGamebaseStats = config.LoadGamebaseStats
 local GlobalStats = {}
 
 local acceptedcolumn = {}
-local AddColumnsAuto = function()
-    for i=1,#GlobalStats do 
-        local stats = GlobalStats[i]
+local AddColumnsAuto = function(tbl)
+    local tbl = tbl or GlobalStats
+    for i=1,#tbl do 
+        local stats = tbl[i]
         local tempType = "INT(200)"
         local tempDefault = "0"
         if stats.type == "int" then 
@@ -288,7 +289,14 @@ end
 RegisterServerCallback("GetPlayerStats", GetPlayerStats )
 
 
-exports("LoadStatsDataFile",LoadStatsDataFile)
+exports("LoadStatsDataFile",function(...)
+    local r = LoadStatsDataFile(...)
+    CreateThread(function() 
+        AddColumnsAuto(r)
+        print(json.encode(r))
+    end)
+    return r 
+end)
 exports("RemovePlayerStat",RemovePlayerStat)
 exports("AddPlayerStat",AddPlayerStat)
 exports("SetPlayerStat",SetPlayerStat)
