@@ -17,6 +17,9 @@ else
         GetPlayerStats = function(...)
             return exports["nb-stats"]:GetPlayerStats(...)
         end 
+        LoadStats = function(...)
+            return exports["nb-stats"]:LoadStats(...)
+        end 
         
     else 
 

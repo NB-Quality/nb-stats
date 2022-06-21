@@ -1,55 +1,32 @@
 local LoadGamebaseStats = config.LoadGamebaseStats
-local stats_csv,stats_csv_gamebase,stats_all; 
+local stats_csv,stats_csv_gamebase; 
+local GlobalStats = {}
 
-stats_all = {}
-stats_csv = ReadCSV("data/stats.csv")
-
-
-if LoadGamebaseStats then 
-    stats_csv_gamebase = ReadCSV("data/gamebase.csv") 
-    for i=1,#stats_csv_gamebase do 
-        local stats = stats_csv_gamebase[i]
-        stats_all[stats.stat] = stats
-    end 
-end
-
-for i=1,#stats_csv do 
-    local stats = stats_csv[i]
-    stats_all[stats.stat] = stats
-end 
-
-local GetMinMax = function(stat)
-    local stat = stat:lower()
-    local d = stats_all[stat] or error(stat,2)
-    return d.min,d.max
-end 
-
-local acceptedcolumn = {}
-CreateThread(function() 
-    if LoadGamebaseStats then 
-        for i=1,#stats_csv_gamebase do 
-            local stats = stats_csv_gamebase[i]
-            local tempType = "INT(200)"
-            local tempDefault = "0"
-            if stats.type == "int" then 
-                tempType = "INT(200)"
-                tempDefault = "0"
-            elseif stats.type == "float" then 
-                tempType = "DECIMAL(10,6)"
-                tempDefault = "0.000000"
-            elseif stats.type == "string" then 
-                tempType = "VARCHAR(200)"
-                tempDefault = ""
-            end 
-            table.insert(acceptedcolumn,stats.stat)
-            local result = exports.oxmysql:query_async([[SHOW COLUMNS FROM `stats` LIKE ?]],{stats.stat})
-            if #result == 0 then 
-                exports.oxmysql:query_async([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NULL DEFAULT ?]], {tempDefault})
-            end 
+local LoadStats = function(path)
+    local raw =  LoadResourceFile(GetCurrentResourceName(),path) 
+    if not raw then 
+        local invoking = GetInvokingResource()
+        if invoking then 
+            raw = LoadResourceFile(invoking,path)
         end 
     end 
-    for i=1,#stats_csv do 
-        local stats = stats_csv[i]
+    local datas = ReadCSVRaw(raw)
+    for i=1,#datas do 
+        local stats = datas[i]
+        GlobalStats[stats.stat] = stats
+    end 
+    return datas 
+end 
+
+if LoadGamebaseStats then 
+    stats_csv_gamebase = LoadStats("data/gamebase.csv") 
+end
+stats_csv = LoadStats("data/stats.csv")
+
+local acceptedcolumn = {}
+local AddColumnsAuto = function(csv_data)
+    for i=1,#csv_data do 
+        local stats = csv_data[i]
         local tempType = "INT(200)"
         local tempDefault = "0"
         if stats.type == "int" then 
@@ -62,13 +39,28 @@ CreateThread(function()
             tempType = "VARCHAR(200)"
             tempDefault = ""
         end 
+        
         table.insert(acceptedcolumn,stats.stat)
         local result = exports.oxmysql:query_async([[SHOW COLUMNS FROM `stats` LIKE ?]],{stats.stat})
         if #result == 0 then 
             exports.oxmysql:query_async([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NULL DEFAULT ?]], {tempDefault})
         end 
     end 
+
+end 
+
+CreateThread(function() 
+    if LoadGamebaseStats then 
+        AddColumnsAuto(stats_csv_gamebase)
+    end 
+    AddColumnsAuto(stats_csv)
 end)
+
+local GetMinMax = function(stat)
+    local stat = stat:lower()
+    local d = GlobalStats[stat] or error(stat,2)
+    return d.min,d.max
+end 
 
 local GetPlayerLicense = function(type, player)
     for k,v in pairs(GetPlayerIdentifiers(player))do
@@ -287,7 +279,7 @@ end
 RegisterServerCallback("GetPlayerStats", GetPlayerStats )
 
 
-
+exports("LoadStats",LoadStats)
 exports("RemovePlayerStat",RemovePlayerStat)
 exports("AddPlayerStat",AddPlayerStat)
 exports("SetPlayerStat",SetPlayerStat)
