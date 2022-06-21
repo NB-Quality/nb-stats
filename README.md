@@ -19,7 +19,7 @@ AddPlayerStat(player,type,amount,cb,reason)
 SetPlayerStat(player,type,amount,cb,reason)
 GetStatsLog(player,cb)
 GetPlayerStats(player,cb)
-LoadStats(path) --will try to load your script:/path first,then nb-stats:/path
+LoadStatsDataFile(path) --will try to load your script:/path first,then nb-stats:/path
 ```
 
 ## client functions
@@ -27,7 +27,7 @@ LoadStats(path) --will try to load your script:/path first,then nb-stats:/path
 UpdatePlayerStats()
 GetPlayerStat(stat, type, isCustomStatHash)
 SetPlayerStat(stat, amount, isCustomStatHash)
-LoadClientTempStats(path) --return a stat list , will try to load your script:/path first,then nb-stats:/path
+LoadClientTempStatsDataFile(path) --return a stat list , will try to load your script:/path first,then nb-stats:/path
 ```
 
 ## configs 
