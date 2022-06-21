@@ -239,6 +239,7 @@ local GetPlayerStats = function(player,cb)
     local result = exports.oxmysql:query_async("SELECT "..table.concat(acceptedcolumn,",").." FROM stats WHERE license = ? LIMIT 1", {license})
     local Stat_account = result and result[1]
     local Stat_account_numbered
+    
     if Stat_account then 
         for i,v in pairs(Stat_account) do 
             if tonumber(tostring(tonumber(v))) == tonumber(v) then 
@@ -265,6 +266,7 @@ local GetPlayerStats = function(player,cb)
                 cb(Stat_account_numbered)
             else 
                 cb({}) -- error
+                error("",2)
             end
             
         end)

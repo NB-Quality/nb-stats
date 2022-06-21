@@ -1,31 +1,35 @@
 local gameUI,customUI,MixUI,UIcolor,UIPanel = (config.UI == "gamebase"), (config.UI == "custom"), (config.UI == "mix"), config.slotsColor
 local LoadGamebaseStats = config.LoadGamebaseStats
-local client_ui_csv,client_ui_csv_gamebase,client_ui_stats_all;
- 
-client_ui_stats_all = {}
-client_ui_csv = ReadCSV("data/stats.csv")
+local GlobalStats = {}
+local GlobalStored = {}
 
-GlobalData = {}
+local LoadStats = function(path)
+    local raw =  LoadResourceFile(GetCurrentResourceName(),path) 
+    if not raw then 
+        local invoking = GetInvokingResource()
+        if invoking then 
+            raw = LoadResourceFile(invoking,path)
+        end 
+    end 
+    local datas = ReadCSVRaw(raw)
+    for i=1,#datas do 
+        local stats = datas[i]
+        GlobalStats[stats.stat] = stats
+    end 
+
+    return datas 
+end 
 
 if LoadGamebaseStats then 
-    client_ui_csv_gamebase = ReadCSV("data/gamebase.csv") 
-    for i=1,#client_ui_csv_gamebase do 
-        local stats = client_ui_csv_gamebase[i]
-        client_ui_stats_all[stats.stat] = stats
-    end 
+    LoadStats("data/gamebase.csv")
 end
-
-for i=1,#client_ui_csv do 
-    local stats = client_ui_csv[i]
-    client_ui_stats_all[stats.stat] = stats
-end 
+LoadStats("data/stats.csv")
 
 local GetMinMax = function(stat)
     local stat = stat:lower()
-    local d = client_ui_stats_all[stat] or error(stat,2)
+    local d = GlobalStats[stat] or error(stat,2)
     return d.min,d.max
 end 
-
 
 if gameUI or customUI or MixUI then 
     CreateThread(function()
@@ -64,11 +68,11 @@ end
 
 local StoreCustom = function(stat,amount)
     local stat = stat:lower()
-    GlobalData[stat] = amount 
+    GlobalStored[stat] = amount 
 end 
 local GetStoreCustom = function(stat)
     local stat = stat:lower()
-    return GlobalData[stat] 
+    return GlobalStored[stat] 
 end 
 
 SetPlayerStat = function (stat,amount)
