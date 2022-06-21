@@ -2,9 +2,9 @@ local LoadGamebaseStats = config.LoadGamebaseStats
 local GlobalStats = {}
 
 local acceptedcolumn = {}
-local AddColumnsAuto = function(csv_data)
-    for i=1,#csv_data do 
-        local stats = csv_data[i]
+local AddColumnsAuto = function()
+    for i=1,#GlobalStats do 
+        local stats = GlobalStats[i]
         local tempType = "INT(200)"
         local tempDefault = "0"
         if stats.type == "int" then 
@@ -27,6 +27,10 @@ local AddColumnsAuto = function(csv_data)
     
 end 
 
+CreateThread(function() 
+    AddColumnsAuto()
+end)
+
 local LoadStatsDataFile = function(path)
     local raw =  LoadResourceFile(GetCurrentResourceName(),path) 
     if not raw then 
@@ -38,22 +42,28 @@ local LoadStatsDataFile = function(path)
     local datas = ReadCSVRaw(raw)
     for i=1,#datas do 
         local stats = datas[i]
-        GlobalStats[stats.stat] = stats
+        table.insert(GlobalStats,stats)
     end 
-    AddColumnsAuto(datas)
+    
     return datas 
 end 
 
-CreateThread(function() 
-    if LoadGamebaseStats then 
-        LoadStatsDataFile("data/gamebase.csv")
-    end
-    LoadStatsDataFile("data/stats.csv")
-end)
+if LoadGamebaseStats then 
+    LoadStatsDataFile("data/gamebase.csv")
+end
+LoadStatsDataFile("data/stats.csv")
 
 local GetMinMax = function(stat)
     local stat = stat:lower()
-    local d = GlobalStats[stat] or error(stat,2)
+    local found 
+    for i=1,#GlobalStats do 
+        local statitem = GlobalStats[i]
+        if statitem.stat == stat then 
+            found = statitem
+            break 
+        end 
+    end 
+    local d = found or error(stat,2)
     return d.min,d.max
 end 
 
@@ -239,15 +249,16 @@ local GetPlayerStats = function(player,cb)
     local result = exports.oxmysql:query_async("SELECT "..table.concat(acceptedcolumn,",").." FROM stats WHERE license = ? LIMIT 1", {license})
     local Stat_account = result and result[1]
     local Stat_account_numbered
-    
+    local minmaxs = {}
     if Stat_account then 
         for i,v in pairs(Stat_account) do 
             if tonumber(tostring(tonumber(v))) == tonumber(v) then 
                 result[1][i] = tonumber(v)
+                minmaxs[i] = {GetMinMax(i)}
             end 
         end 
         Stat_account_numbered = result[1]
-        cb(Stat_account_numbered)
+        cb(Stat_account_numbered,minmaxs)
     else 
         local datas = {
             license = license
@@ -260,10 +271,11 @@ local GetPlayerStats = function(player,cb)
                 for i,v in pairs(Stat_account) do 
                     if tonumber(tostring(tonumber(v))) == tonumber(v) then 
                         result2[1][i] = tonumber(v)
+                        minmaxs[i] = {GetMinMax(i)}
                     end 
                 end 
                 Stat_account_numbered = result2[1]
-                cb(Stat_account_numbered)
+                cb(Stat_account_numbered,minmaxs)
             else 
                 cb({}) -- error
                 error("",2)

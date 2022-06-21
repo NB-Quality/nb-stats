@@ -1,6 +1,6 @@
 local gameUI,customUI,MixUI,UIcolor,UIPanel = (config.UI == "gamebase"), (config.UI == "custom"), (config.UI == "mix"), config.slotsColor
 local LoadGamebaseStats = config.LoadGamebaseStats
-local GlobalStats = {}
+
 local GlobalStored = {}
 
 local LoadClientTempStats = function(path)
@@ -11,25 +11,9 @@ local LoadClientTempStats = function(path)
             raw = LoadResourceFile(invoking,path)
         end 
     end 
-    local datas = ReadCSVRaw(raw)
-    for i=1,#datas do 
-        local stats = datas[i]
-        GlobalStats[stats.stat] = stats
-    end 
-
-    return datas 
+    return ReadCSVRaw(raw) 
 end 
 
-if LoadGamebaseStats then 
-    LoadClientTempStats("data/gamebase.csv")
-end
-LoadClientTempStats("data/stats.csv")
-
-local GetClientTempMinMax = function(stat)
-    local stat = stat:lower()
-    local d = GlobalStats[stat] or error(stat,2)
-    return d.min,d.max
-end 
 
 if gameUI or customUI or MixUI then 
     CreateThread(function()
@@ -131,8 +115,14 @@ end
 local CurrentPages = {}
 local DisplayingPage = 1
 UpdatePlayerStats = function()
-    TriggerServerCallback("GetPlayerStats",function(skills)
+    TriggerServerCallback("GetPlayerStats",function(skills,minmaxs)
         CurrentPages = {}
+        local GetMinMax = function(stat)
+            local stat = stat:lower()
+            local minmax = minmaxs[stat]
+            local min,max = minmax[1],minmax[2]
+            return min,max
+        end 
         local opts = {}
         
         for i , v in pairs(skills) do 
@@ -143,13 +133,13 @@ UpdatePlayerStats = function()
                 
                 local GetStatIntLocalPercent = function(stat)
                     local r = GetPlayerStat(stat,'int')
-                    local min,max =  GetClientTempMinMax(stat)
+                    local min,max =  GetMinMax(stat)
                     r = math.floor((r - min) / (max - min) * 100)
                     return r
                 end 
                 local GetStatFloatLocalPercent = function(stat,prefix)
                     local r = GetPlayerStat(stat,'float')
-                    local min,max =  GetClientTempMinMax(stat)
+                    local min,max =  GetMinMax(stat)
                     r = (r - min) / (max - min) * 100
                     return r
                 end 
@@ -168,7 +158,7 @@ UpdatePlayerStats = function()
                             if  key == k then -- custom ui slots
                                 
                                 if currentSlots < 9 then 
-                                    local min,max =  GetClientTempMinMax(k)
+                                    local min,max =  GetMinMax(k)
                                     v = math.floor((v - min) / (max - min) * 100)
                                     table.insert(temp,v)
                                     table.insert(temp,k)
