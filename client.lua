@@ -17,7 +17,7 @@ end
 
 if gameUI or customUI or MixUI then 
     CreateThread(function()
-        UIPanel = Scaleform("PLAYER_SWITCH_STATS_PANEL");
+        
         local display = false     
         local SetScriptGfxAlign = SetScriptGfxAlign
         local SetScriptGfxAlignParams = SetScriptGfxAlignParams
@@ -31,19 +31,20 @@ if gameUI or customUI or MixUI then
             end 
             return display
         end 
-        local drawend = ResetScriptGfxAlign
-        
+        UIPanel = Scaleform("PLAYER_SWITCH_STATS_PANEL");
+        UIPanel:PepareDrawInit(init)
         CreateThread(function()
             while true do Wait(50) 
                 local d = IsHudComponentActive(19)
                 if d and not display then 
                     display = true
-                    UIPanel:Draw2D(0.14974765625,0.006,0.1874953125,0.3875,init,drawend)
+                    UIPanel:Draw2D(0.14974765625,0.006,0.1874953125,0.3875)
                     UpdatePlayerStats()
                 elseif not d and display then 
                     display = false 
                     UIPanel:Close()
                     UIPanel = Scaleform("PLAYER_SWITCH_STATS_PANEL");
+                    UIPanel:PepareDrawInit(init)
                 end 
             end 
         end)
@@ -143,7 +144,7 @@ UpdatePlayerStats = function()
                     r = (r - min) / (max - min) * 100
                     return r
                 end 
-                opts = {GetStatIntLocalPercent("STAMINA"),"label:PCARD_STAMINA",GetStatIntLocalPercent("shooting_ability"),"label:PCARD_SHOOTING",GetStatIntLocalPercent("strength"),"label:PCARD_STRENGTH",GetStatIntLocalPercent("stealth_ability"),"label:PCARD_STEALTH",GetStatIntLocalPercent("flying_ability"),"label:PCARD_FLYING",GetStatIntLocalPercent("wheelie_ability"),"label:PCARD_DRIVING",GetStatIntLocalPercent("lung_capacity"),"label:PCARD_LUNG",GetStatFloatLocalPercent("player_mental_state"),"label:PCARD_MENTAL_STATE"}
+                opts = {GetStatIntLocalPercent("STAMINA"),{"PCARD_STAMINA"},GetStatIntLocalPercent("shooting_ability"),{"PCARD_SHOOTING"},GetStatIntLocalPercent("strength"),{"PCARD_STRENGTH"},GetStatIntLocalPercent("stealth_ability"),{"PCARD_STEALTH"},GetStatIntLocalPercent("flying_ability"),{"PCARD_FLYING"},GetStatIntLocalPercent("wheelie_ability"),{"PCARD_DRIVING"},GetStatIntLocalPercent("lung_capacity"),{"PCARD_LUNG"},GetStatFloatLocalPercent("player_mental_state"),{"PCARD_MENTAL_STATE"}}
                 table.insert(CurrentPages,opts)
             end 
             if customUI or MixUI then  

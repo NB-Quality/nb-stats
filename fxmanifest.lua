@@ -6,6 +6,7 @@ lua54 'yes'
 
 client_scripts {
 'config.lua',
+'lib/loop.lua',
 'lib/scaleform.lua',
 'client.lua'
 }

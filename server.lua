@@ -2,7 +2,7 @@ local LoadGamebaseStats = config.LoadGamebaseStats
 local GlobalStats = {}
 
 local acceptedcolumn = {}
-local AddColumnsAuto = function(tbl)
+local AddColumnsAuto = function(column,type,tbl)
     local tbl = tbl or GlobalStats
     for i=1,#tbl do 
         local stats = tbl[i]
@@ -20,21 +20,18 @@ local AddColumnsAuto = function(tbl)
         end 
         local found = false 
         for i=1,#acceptedcolumn do 
-            if acceptedcolumn[i] == stats.stat then 
+            if acceptedcolumn[i] == stats[column] then 
                 found = true 
                 break 
             end 
         end 
-        if not found then table.insert(acceptedcolumn,stats.stat) end
-        exports.oxmysql:query([[SHOW COLUMNS FROM `stats` LIKE ?]],{stats.stat},function(result)
-            
+        if not found then table.insert(acceptedcolumn, stats[column]) end
+        exports.oxmysql:query([[SHOW COLUMNS FROM `]]..type..[[` LIKE ?]],{ stats[column]},function(result)
             if #result == 0 then 
-                exports.oxmysql:query([[ALTER TABLE stats ADD COLUMN ]]..stats.stat..[[ ]]..tempType..[[ NULL DEFAULT ?]], {tempDefault})
+                exports.oxmysql:query([[ALTER TABLE `]]..type..[[` ADD COLUMN ]].. stats[column]..[[ ]]..tempType..[[ NULL DEFAULT ?]], {tempDefault})
             end 
         end) 
-        
     end 
-    
 end 
 
 
@@ -50,9 +47,10 @@ local LoadStatsDataFile = function(path)
     local datas = ReadCSVRaw(raw)
     for i=1,#datas do 
         local stats = datas[i]
+        if stats.type == "string" then stats.min = nil stats.max = nil end 
         table.insert(GlobalStats,stats)
     end 
-    AddColumnsAuto(datas)
+    AddColumnsAuto("stat","stats",datas)
     return datas 
 end 
 
@@ -66,7 +64,7 @@ local GetMinMax = function(stat)
     local found 
     for i=1,#GlobalStats do 
         local statitem = GlobalStats[i]
-        if statitem.stat == stat then 
+        if statitem.stat == stat and statitem.type ~= "string" then 
             found = statitem
             break 
         end 
