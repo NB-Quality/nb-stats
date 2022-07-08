@@ -78,7 +78,7 @@ do
         end 
     end 
 
-    local PepareLoop = function(duration,init)
+    local LoopParty = function(duration,init)
         if not Loops[duration] then Loops[duration] = {} end 
         local self = {}
         self.duration = duration
@@ -185,7 +185,7 @@ do
         self.set = self.transfer 
         return self
     end 
-    _M_.PepareLoop = PepareLoop
+    _M_.LoopParty = LoopParty
 end 
 
-PepareLoop = _M_.PepareLoop
+LoopParty = _M_.LoopParty

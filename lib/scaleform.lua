@@ -1,9 +1,9 @@
-local PepareLoop = PepareLoop
-if not PepareLoop then 
+local LoopParty = LoopParty
+if not LoopParty then 
     local try = LoadResourceFile("nb-libs","shared/loop.lua") or LoadResourceFile("nb-loop","nb-loop.lua")
-    PepareLoop = PepareLoop or load(try.." return PepareLoop(...)")
+    LoopParty = LoopParty or load(try.." return LoopParty(...)")
 end 
-if not PepareLoop then
+if not LoopParty then
     print("loop lib not found, some functions can not be used")
 end 
 
@@ -34,7 +34,7 @@ Scaleform.Request = function(name)
         
     }
     function self:Release(duration,cb)
-        if PepareLoop then 
+        if LoopParty then 
             local cb = type(duration) ~= "number" and duration or cb 
             local duration = type(duration) == "number" and duration or nil
             if not duration then 
@@ -82,7 +82,7 @@ Scaleform.Request = function(name)
     function self:IsAlive()
         return not unvalid
     end
-    if PepareLoop then 
+    if LoopParty then 
         local DrawScaleformMovieFullscreen = DrawScaleformMovieFullscreen
         local DrawScaleformMovie = DrawScaleformMovie
         local DrawScaleformMovie_3dNonAdditive = DrawScaleformMovie_3dNonAdditive
@@ -91,7 +91,7 @@ Scaleform.Request = function(name)
             local drawer = function(...) _drawer(handle,...) end  
             return function(cb)
                 if not loop then 
-                    loop = PepareLoop(0)
+                    loop = LoopParty(0)
                     local unpack = table.unpack
                     if not drawinit then 
                         loop(function(duration)
